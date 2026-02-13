@@ -10,7 +10,7 @@
 //LIBRARIES
 #include <Adafruit_Sensor.h>
 #include <Adafruit_AHTX0.h>
-//#include <Adafruit_SHTC3.h>
+#include <Adafruit_SHTC3.h>
 #include "Arduino_GigaDisplay_GFX.h"
 
 //OBJECTS
@@ -30,6 +30,7 @@ Adafruit_AHTX0 aht2; //probe sensor 1, for top level temp and humidity
 #define BLUE 0x4b17
 
 //FUNCTIONS
+bool shtc3Works = true;
 void channelSelect(uint8_t);
 void drawThickRoundRect(uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t, uint16_t);
 void partialFillRoundRect(uint16_t,uint16_t,uint16_t,uint16_t,uint16_t,uint16_t, uint16_t);
@@ -71,16 +72,17 @@ void setup()
  display.println("AHT10 or AHT20 found");
 
   // Ambient Temp/Humidity Check. Bottom Level
-  // display.setCursor(25,355); //x,y
+  display.setCursor(25,355); //x,y
   
-  // display.println("SHTC3 test");
-  // if (! shtc3.begin()) 
-  // {
-  //   display.println("Couldn't find SHTC3");
-  //   while (1) delay(10);
-  //   //it's getting stuck in here bc it still can't find the shtc3
-  // }
-  // display.println("Found SHTC3 sensor");
+  Serial.println("SHTC3 test");
+  if (!shtc3.begin()) 
+  {
+    Serial.println("Couldn't find SHTC3");
+    shtc3Works = false;
+  }
+  else {
+    Serial.println("Found SHTC3 sensor");
+  }
 
   display.fillScreen(GREEN);
 
@@ -128,17 +130,18 @@ void loop()
   display.print("Humidity: "); display.print(probeHumidity1.relative_humidity); display.println("% rH");
 
   //bottom level (bottom level/ambient)
-  // sensors_event_t ambientHumidity, ambientTemp;
-  // channelSelect(4);
-  // shtc3.getEvent(&ambientHumidity, &ambientTemp);// populate temp and humidity objects with fresh data
-  // int temp2 = ((ambientTemp.temperature)*1.8) + 32;
+   if (shtc3Works) {sensors_event_t ambientHumidity, ambientTemp;
+   channelSelect(4);
+   shtc3.getEvent(&ambientHumidity, &ambientTemp);// populate temp and humidity objects with fresh data
+   int temp2 = ((ambientTemp.temperature)*1.8) + 32;
 
-  // display.fillRect(12,332,360,140,GREEN);
-  // display.setCursor(25,355); //x,y
-  // display.print("Temp: "); display.print(temp2); display.println(" F");
-  // display.setCursor(25,385); // yDiff = 30
-  // display.print("Humidity: "); display.print(ambientHumidity.relative_humidity); display.println("% rH");
-
+   display.fillRect(12,332,360,140,GREEN);
+   display.setCursor(25,355); //x,y
+   display.print("Temp: "); display.print(temp2); display.println(" F");
+   display.setCursor(25,385); // yDiff = 30
+   display.print("Humidity: "); display.print(ambientHumidity.relative_humidity); display.println("% rH");
+   }
+ 
   // LIQUID LEVEL SENSOR
   float resistance = analogRead(0); //read resistance from analog pin 0
   
