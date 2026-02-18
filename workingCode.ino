@@ -122,42 +122,35 @@ void attemptSensor(int channel){
   channelSelect(channel);
   string displayLine1 = "";
   string displayLine2 = "";
+  int originY == 12
   
   // TEMP/HUMIDITY PROBE 1 (top level)
-  if (channel == 6){
-    if (ahtSensor1Status){
-      ahtSensor1.getEvent(&probeHumidity, &probeTemp)
-    }
-    else {
-      displayLine1 = "Could not find AHT Sensor 1. (#6 on multiplexer)"
-    }
+  if (channel == 6 && ahtSensor1Status){
+    ahtSensor1.getEvent(&probeHumidity, &probeTemp);
+    originY = 12;
   }
   // TEMP/HUMIDITY PROBE 2 (middle level/ambient)
-  else if (channel == 3){
-    if (ahtSensor2Status){
-      ahtSensor2.getEvent(&probeHumidity, &probeTemp)
-    }
-    else {
-      displayLine1 = "Could not find AHT Sensor 2. (#3 on multiplexer)"
-    }
+  else if (channel == 3 && ahtSensor2tatus){
+    ahtSensor2.getEvent(&probeHumidity, &probeTemp);
+    originY = 172;
   }
   // bottom level (bottom level/ambient)
-  else if (channel == 4){
-    if (shtcSensorStatus){
-      shtcSensor.getEvent(&probeHumidity, &probeTemp)
-    }
-    else {
-      displayLine1 = "Could not find SHTC Sensor. (#4 on multiplexer)"
-    }
+  else if (channel == 4 && shtcSensorStatus){
+    shtcSensor.getEvent(&probeHumidity, &probeTemp);
+    originY = 372;
+  }
+  else {
+    displayLine1 = "loop error: sensor on pin " + String(channel);
   }
 
-  if (!displayLine1) {
+  // if no error, display stats
+  if (displayLine1 == ""){
     int temp = ((probeTemp.temperature)*1.8) + 32; // convert to Fahrenheit
     displayLine1 = "Temp: " + String(temp) + " F";
     displayLine2 = "Humidity: " + String(probeHumidity.relative_humidity) + "% rH";
   }
 
-  display.fillRect(12, 12, 360, 140, GREEN);
+  display.fillRect(12, originY, 360, 140, GREEN);
   display.setCursor(25, 35);
   display.print(displayLine1);
   display.setCursor(25, 65); // yDiff = 30
@@ -202,7 +195,7 @@ void loop()
 
     count = 0;
   }
- count ++;
+  count ++;
 
   delay(60000); // repeat loop every minute
 }
